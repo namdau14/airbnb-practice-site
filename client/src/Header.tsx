@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { UserContext } from "./UserContext";
 
 export default function Header() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const {user}: any = useContext(UserContext);
     return (
       <header className='flex justify-between'>
