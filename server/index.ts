@@ -8,12 +8,14 @@ const app = express();
 const User = require('./models/User');
 const CookieParser = require('cookie-parser');
 const salt = bcrypt.genSaltSync(10);
+const imageDownloader = require('image-downloader');
 const jwtSecret = 'oijrwgoirejgoiejgoiejgoiegorejgeoirg';
 
 require('dotenv').config();
 
 app.use(express.json());
 app.use(CookieParser());
+app.use('/uploads', express.static(__dirname + '/uploads'))
 app.use(cors({
     credentials: true,
     origin: 'http://localhost:5173',
@@ -66,6 +68,17 @@ app.get('/profile', (req: any, res: any) => {
         res.json(null);
     }
 }) 
+
+app.post('/uploadByLink', async (req: any, res: any) => {
+    const {link} = req.body;
+    const newImageName = 'photo' + Date.now() + '.jpg';
+    const destPath = __dirname + '/uploads/' + newImageName;
+    await imageDownloader.image({
+        url: link,
+        dest: destPath,
+    })
+    res.json(destPath);
+});
 
 app.post('/logout', (req: any, res: any) => {
     res.cookie('token', '').json(true);
