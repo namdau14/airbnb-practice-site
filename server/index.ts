@@ -9,6 +9,8 @@ const User = require('./models/User');
 const CookieParser = require('cookie-parser');
 const salt = bcrypt.genSaltSync(10);
 const imageDownloader = require('image-downloader');
+const multer = require('multer');
+const fs = require('fs');
 const jwtSecret = 'oijrwgoirejgoiejgoiejgoiegorejgeoirg';
 
 require('dotenv').config();
@@ -79,6 +81,23 @@ app.post('/uploadByLink', async (req: any, res: any) => {
     })
     res.json(destPath);
 });
+
+
+const photosMiddleware = multer({dest: 'uploads/'})
+
+app.post('/upload', photosMiddleware.array('photos', 100), (req: any, res: any) => {
+    const uploadedFiles = []
+    for (let i = 0; i < req.files.length; i++) {
+        const {path, originalName} = req.files[i];
+        const parts = originalName.split('.');
+        const ext = parts[parts.length - 1]
+        const newPath = path + '.' + ext;
+        fs.renameSync(path, newPath)
+        uploadedFiles.push(newPath.replace('uploads/', ''));
+    }
+    res.json(uploadedFiles);
+});
+
 
 app.post('/logout', (req: any, res: any) => {
     res.cookie('token', '').json(true);
