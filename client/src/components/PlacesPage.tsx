@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import Perks from "../Perks";
 import axios from "axios";
 import PhotosUploader from "../PhotosUploader";
@@ -15,6 +15,7 @@ export default function PlacesPage() {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
     const [maxGuests, setMaxGuests] = useState(1);
+    const [redirect, setRedirect] = useState('')
 
     function inputHeader(text: string) {
         return (<h2 className='text-2xl mt-4'>{text}</h2>);
@@ -33,6 +34,17 @@ export default function PlacesPage() {
         )
     }
 
+    async function addNewPlace(ev) {
+        ev.preventDefault();
+        const placeData = {title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests};
+        await axios.post('/places', placeData);
+        setRedirect('/account/places');
+    }
+
+    if (redirect) {
+        return <Navigate to={redirect} />
+    }
+
     return (
         <div>
             {action !== 'new' && (
@@ -47,7 +59,7 @@ export default function PlacesPage() {
             )}
             {action === 'new' && (
                 <div>
-                    <form>
+                    <form onSubmit={addNewPlace}>
                         {preInput('Title', 'Name of your place, should be short and catchy')}
                         <input type='text' value={title} onChange={ev => setTitle(ev.target.value)} placeholder='title, for example: My lovely apt'/>
                         {preInput('Address', 'Where to find your place')}

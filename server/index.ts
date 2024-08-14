@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
 const User = require('./models/User');
+const Place = require('./models/Place')
 const CookieParser = require('cookie-parser');
 const salt = bcrypt.genSaltSync(10);
 const imageDownloader = require('image-downloader');
@@ -98,6 +99,26 @@ app.post('/upload', photosMiddleware.array('photos', 100), (req: any, res: any) 
     res.json(uploadedFiles);
 });
 
+app.post('/places', (req: any, res: any) => {
+    const {token} = req.cookies;
+    const {title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests} = req.body
+    jwt.verify(token, jwtSecret, {}, async (err: any, userData: any) => {
+        if (err) throw err;
+        const placeDoc = await Place.create({
+            owner: userData.id,
+            title: title,
+            address: address,
+            photos: photos,
+            description: description,
+            perks: perks,
+            extraInfo: extraInfo,
+            checkInTime: checkIn,
+            checkOutTime: checkOut,
+            maxGuests: maxGuests
+        })
+        res.json(placeDoc);
+    });
+});
 
 app.post('/logout', (req: any, res: any) => {
     res.cookie('token', '').json(true);
